@@ -15,6 +15,7 @@ typedef struct cola{
 int FLOAT[6][4];
 int ENTERO[2][3];
 int STRING[4][3];
+//int LOGICO[][];
 
 struct nodo * crearNodo(char new_caracter){
   struct nodo * new = (struct nodo *)malloc(sizeof(struct nodo));
@@ -99,7 +100,6 @@ int ES_ENTERO(struct cola * C){
   int e_actual = 0;
   char c;
   while(isEmpty(C)==0){
-    //show_cola(C);
     c = desencolar(C);
     printf("%c\n", c);
     if (c == 43 || c == 45){
@@ -145,20 +145,21 @@ int ES_FLOAT(struct cola * C){
 }
 
 int ES_STRING(struct cola * C){
-  
   int e_actual = 0;
   char c;
   while(isEmpty(C)==0){
+    show_cola(C);
     c = desencolar(C);
     if (c == 34){
       e_actual = STRING[e_actual][0];
-    }else if ((c>=97 && c<=122) || (c>=65 && c<=90) || ()) {
-      e_actual = FLOAT[e_actual][2];
+    }else if ((c>=32 && c<=33) || (c>=35 && c<=126)) {
+      e_actual = STRING[e_actual][1];
     }else{
       return 0;
     }
+
   }
-  if (FLOAT[e_actual][3]==2){
+  if (STRING[e_actual][2]==2){
     return 1;
   }else{
     return 0;
@@ -302,15 +303,17 @@ int main(int  argc, char * argv[]){
           printf("{ %d | %d | %d | %d }\n", FLOAT[i][0], FLOAT[i][1],FLOAT[i][2],FLOAT[i][3]);
         }
         struct cola * C = crearCola();
-        C = encolar(C,43);
+        C = encolar(C,34);
         C = encolar(C,49);
-        //C = encolar(C,46);
+        C = encolar(C,126);
         C = encolar(C,48);
         C = encolar(C,50);
-        if(ES_ENTERO(C)){
-          printf("Palabra es ENTERO\n" );
+        C = encolar(C,68);
+        C = encolar(C,34);
+        if(ES_STRING(C)){
+          printf("Palabra es STRING\n");
         }else{
-          printf("Palabra NO ENTERO\n" );
+          printf("Palabra NO STRING\n" );
         }
         //procesar(input,output);
         printf("\n");
