@@ -15,7 +15,10 @@ typedef struct cola{
 int FLOAT[6][4];
 int ENTERO[2][3];
 int STRING[4][3];
-//int LOGICO[][];
+int ASIGNACION[3][2];
+int ARITMETICO[3][2];
+int LOGICO[8][7];
+int RELACIONAL[5][4];
 
 struct nodo * crearNodo(char new_caracter){
   struct nodo * new = (struct nodo *)malloc(sizeof(struct nodo));
@@ -89,9 +92,10 @@ char show_cola(struct cola * C){
   }else{
     struct nodo * aux = C->first;
     while(aux!= NULL){
-      printf("%i-", aux->caracter);
+      printf("%c", aux->caracter);
       aux = aux->sig;
     }
+    printf("\n" );
   }
 }
 
@@ -107,12 +111,9 @@ int ES_ENTERO(struct cola * C){
     }else if (c>=48 && c<=57) {
       e_actual = ENTERO[e_actual][1];
     }else{
-      printf("entre aca\n" );
       return 0;
     }
   }
-
-  printf("Estado actual post analisis %d\n", e_actual);
   if (ENTERO[e_actual][2]==2){
     return 1;
   }else{
@@ -148,7 +149,6 @@ int ES_STRING(struct cola * C){
   int e_actual = 0;
   char c;
   while(isEmpty(C)==0){
-    show_cola(C);
     c = desencolar(C);
     if (c == 34){
       e_actual = STRING[e_actual][0];
@@ -166,6 +166,94 @@ int ES_STRING(struct cola * C){
   }
   return 0;
 }
+
+int ES_ASIGNACION(struct cola * C){
+  int e_actual = 0;
+  char c;
+  while(isEmpty(C)==0){
+    c = desencolar(C);
+    if (c == 61){
+      e_actual = ASIGNACION[e_actual][0];
+    }else{
+      return 0;
+    }
+  }
+  if (ASIGNACION[e_actual][1]==2){
+    return 1;
+  }else{
+    return 0;
+  }
+  return 0;
+}
+
+int ES_ARITMETICO(struct cola * C){
+  int e_actual = 0;
+  char c;
+  while(isEmpty(C)==0){
+    c = desencolar(C);
+    if (c == 42 || c==43 || c==45 || c ==47){
+      e_actual = ARITMETICO[e_actual][0];
+    }else{
+      return 0;
+    }
+  }
+  if (ARITMETICO[e_actual][1]==2){
+    return 1;
+  }else{
+    return 0;
+  }
+  return 0;
+}
+
+int ES_RELACIONAL(struct cola * C){
+  int e_actual = 0;
+  char c;
+  while(isEmpty(C)==0){
+    c = desencolar(C);
+    if (c == 61){
+      e_actual = RELACIONAL[e_actual][0];
+    }else if ( c==60 ) {
+      e_actual = RELACIONAL[e_actual][1];
+    }else if ( c==62 ) {
+      e_actual = RELACIONAL[e_actual][2];
+    }
+  }
+  if (RELACIONAL[e_actual][3]==2){
+    return 1;
+  }else{
+    return 0;
+  }
+  return 0;
+}
+
+int ES_LOGICO(struct cola *C){
+  int e_actual = 0;
+  char c;
+  while(isEmpty(C)==0){
+    c = desencolar(C);
+    if (c == 78){
+      e_actual = LOGICO[e_actual][0];
+    }else if ( c==79 ) {
+      e_actual = LOGICO[e_actual][1];
+    }else if ( c==84 ) {
+      e_actual = LOGICO[e_actual][2];
+    }else if (c==68) {
+      e_actual = LOGICO[e_actual][3];
+    }else if (c==82) {
+      e_actual = LOGICO[e_actual][4];
+    }else if (c==65) {
+      e_actual = LOGICO[e_actual][5];
+    }
+  }
+  if (LOGICO[e_actual][6]==2){
+    return 1;
+  }else{
+    return 0;
+  }
+  return 0;
+}
+}
+
 
 
 int preprocesar(){
@@ -240,24 +328,147 @@ int preprocesar(){
   STRING[3][1]=3;
   STRING[3][2]=0;
 
+  //Matriz de AFD para ASIGNACION
+  /*
+  A INICIAL
+  A=0   = = 0
+  B=1   FINAL = 2
+
+  */
+  ASIGNACION[0][0]=1;
+  ASIGNACION[0][1]=1;
+  ASIGNACION[1][0]=1;
+  ASIGNACION[1][1]=2;
+  ASIGNACION[2][0]=2;
+  ASIGNACION[2][1]=0;
+
+  //Matriz de AFD para ARITMETICO
+  /*
+  A INICIAL
+  A=0   +,-,/,* = 0
+  B=1   FINAL = 2
+
+  */
+  ARITMETICO[0][0]=1;
+  ARITMETICO[0][1]=1;
+  ARITMETICO[1][0]=1;
+  ARITMETICO[1][1]=2;
+  ARITMETICO[2][0]=2;
+  ARITMETICO[2][1]=0;
+
+  //Matriz de AFD para RELACIONAL
+  /*
+  A INICIAL
+  A=0   = = 0
+  B=1   < = 1
+  C=2   > = 2
+  D=3   FINAL = 2
+  E=4
+
+  */
+  RELACIONAL[0][0]=3;
+  RELACIONAL[0][1]=2;
+  RELACIONAL[0][2]=1;
+  RELACIONAL[0][3]=1;
+  RELACIONAL[1][0]=3;
+  RELACIONAL[1][1]=4;
+  RELACIONAL[1][2]=4;
+  RELACIONAL[1][3]=2;
+  RELACIONAL[2][0]=3;
+  RELACIONAL[2][1]=4;
+  RELACIONAL[2][2]=3;
+  RELACIONAL[2][3]=2;
+  RELACIONAL[3][0]=4;
+  RELACIONAL[3][1]=4;
+  RELACIONAL[3][2]=4;
+  RELACIONAL[3][3]=2;
+  RELACIONAL[4][0]=4;
+  RELACIONAL[4][1]=4;
+  RELACIONAL[4][2]=4;
+  RELACIONAL[4][3]=0;
+
+  //Matriz de AFD para LOGICO
+  /*
+  A INICIAL
+  A=0   N = 0
+  B=1   O = 1
+  C=2   T = 2
+  D=3   D = 3
+  E=4   R = 4
+  F=5   A = 5
+  G=6   FINAL = 2
+
+
+  */
+  LOGICO[0][0]=1;
+  LOGICO[0][1]=6;
+  LOGICO[0][2]=7;
+  LOGICO[0][3]=7;
+  LOGICO[0][4]=7;
+  LOGICO[0][5]=4;
+  LOGICO[0][6]=1;
+  LOGICO[1][0]=7;
+  LOGICO[1][1]=2;
+  LOGICO[1][2]=7;
+  LOGICO[1][3]=7;
+  LOGICO[1][4]=7;
+  LOGICO[1][5]=7;
+  LOGICO[1][6]=0;
+  LOGICO[2][0]=7;
+  LOGICO[2][1]=7;
+  LOGICO[2][2]=3;
+  LOGICO[2][3]=7;
+  LOGICO[2][4]=7;
+  LOGICO[2][5]=7;
+  LOGICO[2][6]=0;
+  LOGICO[3][0]=7;
+  LOGICO[3][1]=7;
+  LOGICO[3][2]=7;
+  LOGICO[3][3]=7;
+  LOGICO[3][4]=7;
+  LOGICO[3][5]=7;
+  LOGICO[3][6]=2;
+  LOGICO[4][0]=5;
+  LOGICO[4][1]=7;
+  LOGICO[4][2]=7;
+  LOGICO[4][3]=7;
+  LOGICO[4][4]=7;
+  LOGICO[4][5]=7;
+  LOGICO[4][6]=0;
+  LOGICO[5][0]=7;
+  LOGICO[5][1]=7;
+  LOGICO[5][2]=7;
+  LOGICO[5][3]=3;
+  LOGICO[5][4]=7;
+  LOGICO[5][5]=7;
+  LOGICO[5][6]=0;
+  LOGICO[6][0]=7;
+  LOGICO[6][1]=7;
+  LOGICO[6][2]=7;
+  LOGICO[6][3]=7;
+  LOGICO[6][4]=3;
+  LOGICO[6][5]=7;
+  LOGICO[6][6]=0;
+  LOGICO[7][0]=7;
+  LOGICO[7][1]=7;
+  LOGICO[7][2]=7;
+  LOGICO[7][3]=7;
+  LOGICO[7][4]=7;
+  LOGICO[7][5]=7;
+  LOGICO[7][6]=0;
+
   return 1;
 }
 
 int procesar(FILE * entrada, FILE * salida){
-  int contador_palabras_procesadas =0;
+  int contador_palabras_procesadas = 0;
   struct cola * C = crearCola();
   char caracter_actual = fgetc(entrada);
+  char c_sig;
+  int contador_comillas = 0;
   while(caracter_actual != EOF){
-    if(caracter_actual==32){
-      printf("_SEPARADOR_");
-      contador_palabras_procesadas++;
-      show_cola(C);
-    }else{
-      C = encolar(C,caracter_actual);
-      //printf("%c", caracter_actual);
-    }
-    caracter_actual = fgetc(entrada);
-    printf("Se procesaron %d palabras\n", contador_palabras_procesadas);
+    C = encolar(C,caracter_actual);
+
   }
 }
 
@@ -298,25 +509,15 @@ int main(int  argc, char * argv[]){
         output = fopen(argv[2],"w");
         printf("Analizando texto %s, copiando a %s\n",argv[1],argv[2] );
         preprocesar();
-        int i=0;
-        for (i = 0; i < 6; i++) {
-          printf("{ %d | %d | %d | %d }\n", FLOAT[i][0], FLOAT[i][1],FLOAT[i][2],FLOAT[i][3]);
-        }
+        /*
         struct cola * C = crearCola();
-        C = encolar(C,34);
-        C = encolar(C,49);
-        C = encolar(C,126);
-        C = encolar(C,48);
-        C = encolar(C,50);
-        C = encolar(C,68);
-        C = encolar(C,34);
-        if(ES_STRING(C)){
-          printf("Palabra es STRING\n");
+        if(ES_FLOAT(C)){
+          printf("SI\n" );
         }else{
-          printf("Palabra NO STRING\n" );
+          printf("NO\n" );
         }
-        //procesar(input,output);
-        printf("\n");
+        */
+        procesar(input,output);
         fclose(input);
         fclose(output);
         exit(0);
