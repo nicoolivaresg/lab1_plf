@@ -2,16 +2,20 @@
 #include <stdio.h>
 #include <string.h>
 
+//Estructura nodo
 typedef struct nodo{
     char caracter;
     struct nodo * sig;
 }Nodo;
 
+//Estructura Cola
 typedef struct cola{
   struct nodo * first;
   struct nodo * last;
 }Cola;
 
+
+//Matrices que representan a los automatas que reconocen ENTEROS, STRINGS, OPERADORES: ASIGNACION, ARITMETICO, LOGICO, RELACIONAL
 int FLOAT[6][4];
 int ENTERO[2][3];
 int STRING[4][3];
@@ -20,6 +24,11 @@ int ARITMETICO[3][2];
 int LOGICO[8][7];
 int RELACIONAL[5][4];
 
+/*
+RESUMEN: Funcion encargada de inicializar un nodo con un caracter
+ENTRADA: new_caracter = Numero en represntacion ascii del caracter
+SALIDA: un puntero a la estructura inicializada
+*/
 struct nodo * crearNodo(char new_caracter){
   struct nodo * new = (struct nodo *)malloc(sizeof(struct nodo));
   new->caracter = new_caracter;
@@ -27,6 +36,11 @@ struct nodo * crearNodo(char new_caracter){
   return new;
 }
 
+/*
+RESUMEN: Funcion encargada de inicializar una cola vacía
+ENTRADA: sin argumentos
+SALIDA: un puntero a la estructura inicializada
+*/
 struct cola * crearCola(){
   struct cola * new = (struct cola *)malloc(sizeof(struct cola));
   new->first=NULL;
@@ -34,6 +48,11 @@ struct cola * crearCola(){
   return new;
 }
 
+/*
+RESUMEN: Funcion encargada de determinar si una cola esta vacía
+ENTRADA: C = Un puntero a una estructura cola
+SALIDA: Retorna 1 si la cola está vacía y un 0 si no lo está
+*/
 int isEmpty(struct cola * C){
   if(C==NULL){
     return 1;
@@ -46,6 +65,12 @@ int isEmpty(struct cola * C){
   }
 }
 
+/*
+RESUMEN: Funcion encargada de agregar un caracter al final de una cola, encolar
+ENTRADA: C = Un puntero a una estructura cola
+          new_caracter = valor ascii del caracter
+SALIDA: un puntero a la estructura cola modificada
+*/
 struct cola * encolar(struct cola * C, char new_caracter){
   if(isEmpty(C)==1){
     struct nodo * nuevo = crearNodo(new_caracter);
@@ -59,12 +84,15 @@ struct cola * encolar(struct cola * C, char new_caracter){
   }
 }
 
+/*
+RESUMEN: Función encargada de eliminar o desencolar un caracter del inicio de una cola.
+ENTRADA: C = Un puntero a una estructura cola
+SALIDA: el valor ascii del caracter extraido
+*/
 char desencolar(struct cola * C ){
   if(isEmpty(C)==1){
     return -1;
   }else{
-    //printf("Al desencolar se tiene C->first %c\n", C->first->caracter);
-    //printf("Al desencolar se tiene C->last %c\n", C->last->caracter);
     struct nodo * aux = C->first;
     char first_caracter = C->first->caracter;
     if(aux->sig == NULL){
@@ -79,14 +107,24 @@ char desencolar(struct cola * C ){
   }
 }
 
+/*
+RESUMEN: Función encargada de sacar o vaciar todos los caracteres de una cola
+ENTRADA: C = Un puntero a una estructura cola
+SALIDA: retorna 0 como reflejo del exito de la operacion
+*/
 int vaciar_cola(struct cola* C){
   while(isEmpty(C)==0){
     desencolar(C);
   }
-  return 1;
+  return 0;
 }
 
-char show_cola(struct cola * C){
+/*
+RESUMEN: Función encargada de mostrar por consola una cola, o más bien una palabra.
+ENTRADA: C = Un puntero a una estructura cola
+SALIDA: retorna 0 como reflejo del exito de la operacion
+*/
+int show_cola(struct cola * C){
   if(isEmpty(C)==1){
     printf("Empty query\n" );
   }else{
@@ -97,8 +135,14 @@ char show_cola(struct cola * C){
     }
     printf("\n" );
   }
+  return 0;
 }
 
+/*
+RESUMEN: Función encargada de copiar los caracteres de una pila original a una nueva
+ENTRADA: C = Un puntero a una estructura cola
+SALIDA: un puntero a la estructura copiada
+*/
 struct cola * copy_cola(struct cola * original){
   struct nodo * aux = NULL;
   struct cola * copia = crearCola();
@@ -110,6 +154,11 @@ struct cola * copy_cola(struct cola * original){
   return copia;
 }
 
+/*
+RESUMEN: Función encargada de determinar si la palabra en la cola es un ENTERO
+ENTRADA: C = Un puntero a una estructura cola
+SALIDA: retorna un 1 si la palabra es ENTERO, o un 0 en el caso de no serlo
+*/
 int ES_ENTERO(struct cola * C){
   int e_actual = 0;
   char c;
@@ -132,6 +181,11 @@ int ES_ENTERO(struct cola * C){
   return 0;
 }
 
+/*
+RESUMEN: Función encargada de determinar si la palabra en la cola es un STRING
+ENTRADA: C = Un puntero a una estructura cola
+SALIDA: retorna un 1 si la palabra es STRING, o un 0 en el caso de no serlo
+*/
 int ES_STRING(struct cola * C){
   int e_actual = 0;
   char c;
@@ -155,6 +209,11 @@ int ES_STRING(struct cola * C){
   return 0;
 }
 
+/*
+RESUMEN: Función encargada de determinar si la palabra en la cola es un ASIGNACION
+ENTRADA: C = Un puntero a una estructura cola
+SALIDA: retorna un 1 si la palabra es ASIGNACION, o un 0 en el caso de no serlo
+*/
 int ES_ASIGNACION(struct cola * C){
   int e_actual = 0;
   char c;
@@ -177,6 +236,11 @@ int ES_ASIGNACION(struct cola * C){
   return 0;
 }
 
+/*
+RESUMEN: Función encargada de determinar si la palabra en la cola es un ARITMETICO
+ENTRADA: C = Un puntero a una estructura cola
+SALIDA: retorna un 1 si la palabra es ARITMETICO, o un 0 en el caso de no serlo
+*/
 int ES_ARITMETICO(struct cola * C){
   int e_actual = 0;
   char c;
@@ -198,6 +262,11 @@ int ES_ARITMETICO(struct cola * C){
   return 0;
 }
 
+/*
+RESUMEN: Función encargada de determinar si la palabra en la cola es un RELACIONAL
+ENTRADA: C = Un puntero a una estructura cola
+SALIDA: retorna un 1 si la palabra es RELACIONAL, o un 0 en el caso de no serlo
+*/
 int ES_RELACIONAL(struct cola * C){
   int e_actual = 0;
   char c;
@@ -220,6 +289,11 @@ int ES_RELACIONAL(struct cola * C){
   return 0;
 }
 
+/*
+RESUMEN: Función encargada de determinar si la palabra en la cola es un LOGICO
+ENTRADA: C = Un puntero a una estructura cola
+SALIDA: retorna un 1 si la palabra es LOGICO, o un 0 en el caso de no serlo
+*/
 int ES_LOGICO(struct cola *C){
   int e_actual = 0;
   char c;
@@ -248,6 +322,12 @@ int ES_LOGICO(struct cola *C){
   return 0;
 }
 
+/*
+RESUMEN: Función encargada de escribir en un archivo, los caracteres de una cola
+ENTRADA:file = puntero al archivo en formato escritura
+        C = Un puntero a una estructura cola
+SALIDA: retorna 1 como reflejo del exito de la operacion
+*/
 int escribirArchivo(FILE * file, struct cola * C){
   struct cola * cp = copy_cola(C);
   char c;
@@ -255,44 +335,16 @@ int escribirArchivo(FILE * file, struct cola * C){
     c = desencolar(cp);
     fputc(c,file);
   }
+  return 0;
 }
 
+/*
+RESUMEN: Función encargada de preprocesar los datos necesarios en los automatas para aceptar las palabras de este programa
+  esta información se obtuvo en base a la creación de estos automatas usando la teoría enseñada en clases, con AFD
+ENTRADA: sin argumentos
+SALIDA: retorna 0 como reflejo del exito de la operacion
+*/
 int preprocesar(){
-  //Matriz de AFD para FLOAT
-  /*
-  A INICIAL
-  A=0   +-= 0
-  B=1   . = 1
-  C=2   [0-9]= 2
-  D=3   FINAL = 3
-  E=4
-  F=5
-  */
-  FLOAT[0][0]=1;
-  FLOAT[0][1]=2;
-  FLOAT[0][2]=3;
-  FLOAT[0][3]=1;
-  FLOAT[1][0]=-1;
-  FLOAT[1][1]=2;
-  FLOAT[1][2]=3;
-  FLOAT[1][3]=0;
-  FLOAT[2][0]=-1;
-  FLOAT[2][1]=-1;
-  FLOAT[2][2]=4;
-  FLOAT[2][3]=0;
-  FLOAT[3][0]=-1;
-  FLOAT[3][1]=5;
-  FLOAT[3][2]=3;
-  FLOAT[3][3]=0;
-  FLOAT[4][0]=-1;
-  FLOAT[4][1]=-1;
-  FLOAT[4][2]=4;
-  FLOAT[4][3]=2;
-  FLOAT[5][0]=-1;
-  FLOAT[5][1]=-1;
-  FLOAT[5][2]=4;
-  FLOAT[5][3]=2;
-
   //Matriz de AFD para ENTERO
   /*
   A INICIAL
@@ -461,56 +513,82 @@ int preprocesar(){
   LOGICO[7][5]=7;
   LOGICO[7][6]=0;
 
-  return 1;
+  return 0;
 }
 
+/*
+RESUMEN: Función encargada de procesar el texto de entrada para copiarlo al texto de salida,
+  aplicando las funciones antes mencionadas e intercambiando los lexemas por sus correspondientes componentes léxicos
+ENTRADA:  entrada = puntero al archivo de entrada
+          salida = puntero al archivo de salida
+SALIDA: retorna un 0 como reflejo del exito de la operacion
+*/
 int procesar(FILE * entrada, FILE * salida){
+  //Cola que almacena los caracteres de una palabra separada por espacios, tabulaciones o saltos de linea
   struct cola * COLA_NORMAL = crearCola();
+  //En caso de abrirse una comilla esta cola almacena los caracteres del posible string antes de pasarlo por el automata y revisarlo
   struct cola * COLA_STRING = crearCola();
   char caracter_actual = fgetc(entrada);
-  char caracter_previo_palabra;
-  caracter_previo_palabra = caracter_actual;
+  //Este contador ayuda a tener la referencia de la apertura y cierre de comillas para los strings
   int contador_comillas = 0;
+  //Lectura del archivo caracter por caracter
   while(caracter_actual != EOF){
-    if (contador_comillas == 0 && caracter_actual != 32 && caracter_actual != 10 && caracter_actual != 9){
+    if (caracter_actual != 32 && caracter_actual != 10 && caracter_actual != 9){
       COLA_NORMAL = encolar(COLA_NORMAL,caracter_actual);
-    }else if(contador_comillas == 0 && (caracter_actual== 32 || caracter_actual == 10 || caracter_actual == 9)){
-      if(ES_ENTERO(COLA_NORMAL)){
-        //show_cola(COLA_NORMAL);
-        fprintf(salida,"ENTERO%c",caracter_actual);
-        vaciar_cola(COLA_NORMAL);
-      }else if (ES_ASIGNACION(COLA_NORMAL)) {
-        //show_cola(COLA_NORMAL);
-        fprintf(salida, "ASIGNACION%c",caracter_actual);
-        vaciar_cola(COLA_NORMAL);
-      }else if (ES_RELACIONAL(COLA_NORMAL)) {
-        //show_cola(COLA_NORMAL);
-        fprintf(salida,"RELACIONAL%c",caracter_actual);
-        vaciar_cola(COLA_NORMAL);
-      }else if (ES_LOGICO(COLA_NORMAL)) {
-        //show_cola(COLA_NORMAL);
-        fprintf(salida,"LOGICO%c",caracter_actual);
-        vaciar_cola(COLA_NORMAL);
-      }else if (ES_ARITMETICO(COLA_NORMAL)) {
-        //show_cola(COLA_NORMAL);
-        fprintf(salida,"ARITMETICO%c",caracter_actual);
-        vaciar_cola(COLA_NORMAL);
-      }else if (ES_STRING(COLA_NORMAL)){
-        //printf("STRING" );
-        fprintf(salida, "STRING%c",caracter_actual );
-        vaciar_cola(COLA_NORMAL);
-      }else{
-        COLA_NORMAL = encolar(COLA_NORMAL,caracter_actual);
-        escribirArchivo(salida,COLA_NORMAL);
-        vaciar_cola(COLA_NORMAL);
+      if(caracter_actual == 34){
+        contador_comillas++;
+        //Agrega la comilla inicial
+        COLA_STRING = encolar(COLA_STRING,caracter_actual);
       }
-
+      if(contador_comillas==1){
+        //Agrega los caracteres dentro de las comillas
+        COLA_STRING = encolar(COLA_STRING,caracter_actual);
+      }
+      if (contador_comillas ==2) {
+        contador_comillas = 0;
+        //Agrega la comilla final
+        COLA_STRING = encolar(COLA_STRING,caracter_actual);
+        if (ES_STRING(COLA_STRING)){
+          fprintf(salida, "STRING%c",caracter_actual );
+          vaciar_cola(COLA_STRING);
+          vaciar_cola(COLA_NORMAL);
+        }
+      }
+    }else if((caracter_actual== 32 || caracter_actual == 10 || caracter_actual == 9)){
+      if(contador_comillas == 1 && caracter_actual == 32){
+        //Agrega los caracteres ESPACIO dentro de las comillas
+        COLA_STRING = encolar(COLA_STRING,caracter_actual);
+      }else if (contador_comillas == 0 ){
+        //Palabras no son string, FUERA DE COMILLAS
+        if(ES_ENTERO(COLA_NORMAL)){
+          fprintf(salida,"ENTERO%c",caracter_actual);
+          vaciar_cola(COLA_NORMAL);
+        }else if (ES_ASIGNACION(COLA_NORMAL)) {
+          fprintf(salida, "ASIGNACION%c",caracter_actual);
+          vaciar_cola(COLA_NORMAL);
+        }else if (ES_RELACIONAL(COLA_NORMAL)) {
+          fprintf(salida,"RELACIONAL%c",caracter_actual);
+          vaciar_cola(COLA_NORMAL);
+        }else if (ES_LOGICO(COLA_NORMAL)) {
+          fprintf(salida,"LOGICO%c",caracter_actual);
+          vaciar_cola(COLA_NORMAL);
+        }else if (ES_ARITMETICO(COLA_NORMAL)) {
+          fprintf(salida,"ARITMETICO%c",caracter_actual);
+          vaciar_cola(COLA_NORMAL);
+        }else if (ES_STRING(COLA_NORMAL)){
+          fprintf(salida, "STRING%c",caracter_actual );
+          vaciar_cola(COLA_NORMAL);
+        }else{
+          COLA_NORMAL = encolar(COLA_NORMAL,caracter_actual);
+          escribirArchivo(salida,COLA_NORMAL);
+          vaciar_cola(COLA_NORMAL);
+        }
+      }
     }
-    //show_cola(COLA_STRING);
-    show_cola(COLA_NORMAL);
     caracter_actual = fgetc(entrada);
     }
-  }
+    return 0;
+}
 
 
 
@@ -548,7 +626,6 @@ int main(int  argc, char * argv[]){
       }else{
         //Ejecución de proceso de análisis
         output = fopen(argv[2],"w");
-        printf("Analizando texto %s, copiando a %s\n",argv[1],argv[2] );
         preprocesar();
         procesar(input,output);
         fclose(input);
