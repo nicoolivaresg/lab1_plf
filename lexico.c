@@ -15,7 +15,7 @@ typedef struct cola{
 int FLOAT[6][4];
 int ENTERO[2][3];
 int STRING[4][3];
-int ASIGNACION[3][2];
+int ASIGNACION[3][3];
 int ARITMETICO[3][2];
 int LOGICO[8][7];
 int RELACIONAL[5][4];
@@ -99,13 +99,23 @@ char show_cola(struct cola * C){
   }
 }
 
+struct cola * copy_cola(struct cola * original){
+  struct nodo * aux = NULL;
+  struct cola * copia = crearCola();
+  aux = original->first;
+  while(aux!=NULL){
+    copia = encolar(copia, aux->caracter);
+    aux = aux->sig;
+  }
+  return copia;
+}
 
 int ES_ENTERO(struct cola * C){
   int e_actual = 0;
   char c;
-  while(isEmpty(C)==0){
-    c = desencolar(C);
-    printf("%c\n", c);
+  struct cola * copia = copy_cola(C);
+  while(isEmpty(copia)==0){
+    c = desencolar(copia);
     if (c == 43 || c == 45){
       e_actual = ENTERO[e_actual][0];
     }else if (c>=48 && c<=57) {
@@ -122,34 +132,12 @@ int ES_ENTERO(struct cola * C){
   return 0;
 }
 
-int ES_FLOAT(struct cola * C){
-  int e_actual = 0;
-  char c;
-  while(isEmpty(C)==0){
-    c = desencolar(C);
-    if (c == 43 || c==45){
-      e_actual = FLOAT[e_actual][0];
-    }else if (c == 46) {
-      e_actual = FLOAT[e_actual][1];
-    }else if (c>=48 && c<=57) {
-      e_actual = FLOAT[e_actual][2];
-    }else{
-      return 0;
-    }
-  }
-  if (FLOAT[e_actual][3]==2){
-    return 1;
-  }else{
-    return 0;
-  }
-  return 0;
-}
-
 int ES_STRING(struct cola * C){
   int e_actual = 0;
   char c;
-  while(isEmpty(C)==0){
-    c = desencolar(C);
+  struct cola * copia = copy_cola(C);
+  while(isEmpty(copia)==0){
+    c = desencolar(copia);
     if (c == 34){
       e_actual = STRING[e_actual][0];
     }else if ((c>=32 && c<=33) || (c>=35 && c<=126)) {
@@ -170,15 +158,18 @@ int ES_STRING(struct cola * C){
 int ES_ASIGNACION(struct cola * C){
   int e_actual = 0;
   char c;
-  while(isEmpty(C)==0){
-    c = desencolar(C);
+  struct cola * copia = copy_cola(C);
+  while(isEmpty(copia)==0){
+    c = desencolar(copia);
     if (c == 61){
+      e_actual = ASIGNACION[e_actual][1];
+    }else if (c == 60 || c == 62) {
       e_actual = ASIGNACION[e_actual][0];
     }else{
       return 0;
     }
   }
-  if (ASIGNACION[e_actual][1]==2){
+  if (ASIGNACION[e_actual][2]==2){
     return 1;
   }else{
     return 0;
@@ -189,13 +180,15 @@ int ES_ASIGNACION(struct cola * C){
 int ES_ARITMETICO(struct cola * C){
   int e_actual = 0;
   char c;
-  while(isEmpty(C)==0){
-    c = desencolar(C);
+  struct cola * copia = copy_cola(C);
+  while(isEmpty(copia)==0){
+    c = desencolar(copia);
     if (c == 42 || c==43 || c==45 || c ==47){
       e_actual = ARITMETICO[e_actual][0];
     }else{
       return 0;
     }
+
   }
   if (ARITMETICO[e_actual][1]==2){
     return 1;
@@ -208,13 +201,14 @@ int ES_ARITMETICO(struct cola * C){
 int ES_RELACIONAL(struct cola * C){
   int e_actual = 0;
   char c;
-  while(isEmpty(C)==0){
-    c = desencolar(C);
+  struct cola * copia = copy_cola(C);
+  while(isEmpty(copia)==0){
+    c = desencolar(copia);
     if (c == 61){
       e_actual = RELACIONAL[e_actual][0];
-    }else if ( c==60 ) {
+    }else if ( c == 60 ) {
       e_actual = RELACIONAL[e_actual][1];
-    }else if ( c==62 ) {
+    }else if ( c == 62 ) {
       e_actual = RELACIONAL[e_actual][2];
     }
   }
@@ -229,8 +223,9 @@ int ES_RELACIONAL(struct cola * C){
 int ES_LOGICO(struct cola *C){
   int e_actual = 0;
   char c;
-  while(isEmpty(C)==0){
-    c = desencolar(C);
+  struct cola * copia = copy_cola(C);
+  while(isEmpty(copia)==0){
+    c = desencolar(copia);
     if (c == 78){
       e_actual = LOGICO[e_actual][0];
     }else if ( c==79 ) {
@@ -252,9 +247,15 @@ int ES_LOGICO(struct cola *C){
   }
   return 0;
 }
+
+int escribirArchivo(FILE * file, struct cola * C){
+  struct cola * cp = copy_cola(C);
+  char c;
+  while(isEmpty(cp)==0){
+    c = desencolar(cp);
+    fputc(c,file);
+  }
 }
-
-
 
 int preprocesar(){
   //Matriz de AFD para FLOAT
@@ -331,16 +332,19 @@ int preprocesar(){
   //Matriz de AFD para ASIGNACION
   /*
   A INICIAL
-  A=0   = = 0
-  B=1   FINAL = 2
-
+  A=0   <> = 0
+  B=1   = = 1
+  C=2
   */
-  ASIGNACION[0][0]=1;
+  ASIGNACION[0][0]=2;
   ASIGNACION[0][1]=1;
+  ASIGNACION[0][2]=1;
   ASIGNACION[1][0]=1;
   ASIGNACION[1][1]=2;
+  ASIGNACION[1][2]=2;
   ASIGNACION[2][0]=2;
-  ASIGNACION[2][1]=0;
+  ASIGNACION[2][1]=2;
+  ASIGNACION[2][2]=0;
 
   //Matriz de AFD para ARITMETICO
   /*
@@ -461,58 +465,53 @@ int preprocesar(){
 }
 
 int procesar(FILE * entrada, FILE * salida){
-  int contador_palabras_procesadas = 0;
   struct cola * COLA_NORMAL = crearCola();
   struct cola * COLA_STRING = crearCola();
   char caracter_actual = fgetc(entrada);
-  char c_sig;
+  char caracter_previo_palabra;
+  caracter_previo_palabra = caracter_actual;
   int contador_comillas = 0;
   while(caracter_actual != EOF){
-    //Revisa si el caracter es una comilla doble y si es la primera comilla que encuentra
-    if(caracter_actual == 34 && contador_comillas == 0){
-      //Actualiza el contador de comillas que establecera el estado de busqueda del cierre de la comilla al obtener mas caracteres
-      contador_comillas = 1;
-      //Se encola el caracter comilla inicial
-      COLA_STRING = encolar(COLA_STRING,caracter_actual);
-    }
-    //Revisa si el caracter es una comilla doble y si ya se encontro una entoces se verifica que el estado sea de busqueda del cierre de comillas
-    if(caracter_actual == 34 && contador_comillas == 1){
-      //Se reinicia el contador de las comillas
-      contador_comillas = 0;
-      //Se encola el caracter comilla final
-      COLA_STRING = encolar(COLA_STRING,caracter_actual);
-      //Se verifica si toda la palabra es un STRING
-      if (ES_STRING(COLA_STRING)){
-        printf("STRING\n" );
-      }
-    }
-    //Mientras esta en estado de busqueda de comilla
-    if(contador_comillas == 1){
-      COLA_STRING = encolar(COLA_STRING,caracter_actual);
-    }
-
-    //Para las demas palabras buscar espacios
-    if((caracter_actual != 32 && caracter_actual != 10 && caracter_actual != 9) && contador_comillas == 0 ){
-      //El caracter no corresponde a un espacio, un salto de linea o un tab, por lo tanto solo se encola el caracter actual, que es parte de la palabra
+    if (contador_comillas == 0 && caracter_actual != 32 && caracter_actual != 10 && caracter_actual != 9){
       COLA_NORMAL = encolar(COLA_NORMAL,caracter_actual);
-    }else if (caracter_actual == 32 || caracter_actual == 10 || caracter_actual == 9 && contador_comillas == 0 ) {
-      //EL caracter es un espacio, un salto de linea o un tab, por lo tanto se analiza la palabra hasta ese punto
-      if(ES_ENTERO(C)){
-        printf("ENTERO\n");
-      }else if (ES_ASIGNACION(C)) {
-        printf("ASIGNACION\n");
-      }else if (ES_RELACIONAL(C)) {
-        printf("RELACIONAL\n");
-      }else if (ES_LOGICO(C)) {
-        printf("LOGICO\n");
-      }else if (ES_ARITMETICO(C)) {
-        printf("ARITMETICO\n");
+    }else if(contador_comillas == 0 && (caracter_actual== 32 || caracter_actual == 10 || caracter_actual == 9)){
+      if(ES_ENTERO(COLA_NORMAL)){
+        //show_cola(COLA_NORMAL);
+        fprintf(salida,"ENTERO%c",caracter_actual);
+        vaciar_cola(COLA_NORMAL);
+      }else if (ES_ASIGNACION(COLA_NORMAL)) {
+        //show_cola(COLA_NORMAL);
+        fprintf(salida, "ASIGNACION%c",caracter_actual);
+        vaciar_cola(COLA_NORMAL);
+      }else if (ES_RELACIONAL(COLA_NORMAL)) {
+        //show_cola(COLA_NORMAL);
+        fprintf(salida,"RELACIONAL%c",caracter_actual);
+        vaciar_cola(COLA_NORMAL);
+      }else if (ES_LOGICO(COLA_NORMAL)) {
+        //show_cola(COLA_NORMAL);
+        fprintf(salida,"LOGICO%c",caracter_actual);
+        vaciar_cola(COLA_NORMAL);
+      }else if (ES_ARITMETICO(COLA_NORMAL)) {
+        //show_cola(COLA_NORMAL);
+        fprintf(salida,"ARITMETICO%c",caracter_actual);
+        vaciar_cola(COLA_NORMAL);
+      }else if (ES_STRING(COLA_NORMAL)){
+        //printf("STRING" );
+        fprintf(salida, "STRING%c",caracter_actual );
+        vaciar_cola(COLA_NORMAL);
+      }else{
+        COLA_NORMAL = encolar(COLA_NORMAL,caracter_actual);
+        escribirArchivo(salida,COLA_NORMAL);
+        vaciar_cola(COLA_NORMAL);
       }
+
     }
-    //Obtener siguiente caracter
+    //show_cola(COLA_STRING);
+    show_cola(COLA_NORMAL);
     caracter_actual = fgetc(entrada);
+    }
   }
-}
+
 
 
 int main(int  argc, char * argv[]){
@@ -551,14 +550,6 @@ int main(int  argc, char * argv[]){
         output = fopen(argv[2],"w");
         printf("Analizando texto %s, copiando a %s\n",argv[1],argv[2] );
         preprocesar();
-        /*
-        struct cola * C = crearCola();
-        if(ES_FLOAT(C)){
-          printf("SI\n" );
-        }else{
-          printf("NO\n" );
-        }
-        */
         procesar(input,output);
         fclose(input);
         fclose(output);
