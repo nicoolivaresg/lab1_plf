@@ -462,13 +462,55 @@ int preprocesar(){
 
 int procesar(FILE * entrada, FILE * salida){
   int contador_palabras_procesadas = 0;
-  struct cola * C = crearCola();
+  struct cola * COLA_NORMAL = crearCola();
+  struct cola * COLA_STRING = crearCola();
   char caracter_actual = fgetc(entrada);
   char c_sig;
   int contador_comillas = 0;
   while(caracter_actual != EOF){
-    C = encolar(C,caracter_actual);
+    //Revisa si el caracter es una comilla doble y si es la primera comilla que encuentra
+    if(caracter_actual == 34 && contador_comillas == 0){
+      //Actualiza el contador de comillas que establecera el estado de busqueda del cierre de la comilla al obtener mas caracteres
+      contador_comillas = 1;
+      //Se encola el caracter comilla inicial
+      COLA_STRING = encolar(COLA_STRING,caracter_actual);
+    }
+    //Revisa si el caracter es una comilla doble y si ya se encontro una entoces se verifica que el estado sea de busqueda del cierre de comillas
+    if(caracter_actual == 34 && contador_comillas == 1){
+      //Se reinicia el contador de las comillas
+      contador_comillas = 0;
+      //Se encola el caracter comilla final
+      COLA_STRING = encolar(COLA_STRING,caracter_actual);
+      //Se verifica si toda la palabra es un STRING
+      if (ES_STRING(COLA_STRING)){
+        printf("STRING\n" );
+      }
+    }
+    //Mientras esta en estado de busqueda de comilla
+    if(contador_comillas == 1){
+      COLA_STRING = encolar(COLA_STRING,caracter_actual);
+    }
 
+    //Para las demas palabras buscar espacios
+    if((caracter_actual != 32 && caracter_actual != 10 && caracter_actual != 9) && contador_comillas == 0 ){
+      //El caracter no corresponde a un espacio, un salto de linea o un tab, por lo tanto solo se encola el caracter actual, que es parte de la palabra
+      COLA_NORMAL = encolar(COLA_NORMAL,caracter_actual);
+    }else if (caracter_actual == 32 || caracter_actual == 10 || caracter_actual == 9 && contador_comillas == 0 ) {
+      //EL caracter es un espacio, un salto de linea o un tab, por lo tanto se analiza la palabra hasta ese punto
+      if(ES_ENTERO(C)){
+        printf("ENTERO\n");
+      }else if (ES_ASIGNACION(C)) {
+        printf("ASIGNACION\n");
+      }else if (ES_RELACIONAL(C)) {
+        printf("RELACIONAL\n");
+      }else if (ES_LOGICO(C)) {
+        printf("LOGICO\n");
+      }else if (ES_ARITMETICO(C)) {
+        printf("ARITMETICO\n");
+      }
+    }
+    //Obtener siguiente caracter
+    caracter_actual = fgetc(entrada);
   }
 }
 
