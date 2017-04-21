@@ -2,4 +2,6 @@
 
 c 4 asd "ddaaa" <= =
 
-< 4.. aslkd "tengo mas sueno que la ctm"
+< 4.. aslkd "tengo mas sueno que la ctm" ""
+
+NOT AND OR
